@@ -16,17 +16,6 @@ jobs:
       - name: Build Docker images
         run: docker compose build
 
-      - name: Log in to Docker Hub (optional)
-        if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
-      - name: Push Docker images (optional)
-        if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
-        run: docker compose push
-
       # Keep deployment disabled until target environment and image references are configured.
       - name: Deployment placeholder
         run: echo "Build validation passed. Configure registry/image names and deployment target to enable rollout."
