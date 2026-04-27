@@ -49,6 +49,8 @@ cmake_install.cmake
 /go/pkg/
 go.sum
 go.mod
+!backend/go-service/go.mod
+!backend/go-service/go.sum
 
 # Terraform
 .terraform/

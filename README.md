@@ -111,7 +111,7 @@ honeypot/
 - **Grafana** visualizes these metrics via pre-configured dashboards.
 
 ## 🛡️ License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+This project is licensed under the GPL-3.0 License. See the [LICENSE](LICENSE) file for more information.
 
 ## 📢 Contributions
 Feel free to contribute! Fork the repository, create a new branch, and submit a pull request.
