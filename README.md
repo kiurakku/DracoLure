@@ -31,6 +31,26 @@ engineering, software, automation
 - Continuous integration compatibility through GitHub Actions.
 - Documentation-first approach for onboarding and contribution speed.
 
+## How to Install and Use
+
+```bash
+git clone https://github.com/kiurakku/Honeypot-Security-System.git
+cd Honeypot-Security-System
+docker compose build
+docker compose up -d
+```
+
+- **App (example):** `http://localhost:5000` (Python service in compose).
+- **Go service:** `http://localhost:8080`.
+- **Nginx:** port `80` (see `docker-compose.yml` for exact port mappings).
+
+Adjust `DATABASE_URL` and credentials in compose or env before production use.
+
+## Proof of Concept (PoC)
+
+- Bring the stack up with the commands above, then hit the HTTP endpoints from another container or host to generate **honeypot / decoy** traffic.
+- Point **Prometheus/Grafana** (if enabled in your deployment) at the exporters defined in the repo to show **alerts or traffic** (add a screenshot or short GIF of the dashboard when sharing).
+
 ## Tech Context
 
 - **Primary language:** Go
@@ -41,13 +61,7 @@ engineering, software, automation
 
 ## Quick Start
 
-```bash
-git clone https://github.com/kiurakku/Honeypot-Security-System.git
-cd Honeypot-Security-System
-# Install dependencies (project-specific)
-# Build or run tests
-# Start the project
-```
+Same as **How to Install and Use** (clone → `docker compose build` → `docker compose up -d`). For development without Docker, use language-specific `README` files under `app/` and `backend/` if present.
 
 ## Configuration
 
