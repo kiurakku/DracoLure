@@ -3,7 +3,7 @@ name: Terraform Deployment
 on:
   push:
     paths:
-      - 'terraform/**'
+      - 'infrastructure/terraform/**'
 
 jobs:
   terraform:
@@ -18,12 +18,12 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: terraform
+        working-directory: infrastructure/terraform
 
       - name: Terraform Plan
         run: terraform plan
-        working-directory: terraform
+        working-directory: infrastructure/terraform
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
-        working-directory: terraform
+        working-directory: infrastructure/terraform
