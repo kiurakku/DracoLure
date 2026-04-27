@@ -1,6 +1,14 @@
 # Honeypot Security System
 
-A scalable and containerized Honeypot designed to detect malicious activity by mimicking vulnerable services and logging attack data for analysis. Now enhanced with Go, C++, and Terraform for better performance, security, and scalability.
+Production-style honeypot lab that simulates vulnerable services, captures malicious traffic, and exposes observability data for analysis.  
+The project combines Python, Go, C++, Docker, and Terraform to demonstrate both engineering depth and security operations workflows.
+
+## Why this project matters
+
+- Demonstrates practical **security engineering** and not only theory.
+- Shows **polyglot implementation** across Python, Go, and C++.
+- Includes **DevOps/observability workflow** with Docker, Terraform, Prometheus, and Grafana.
+- Useful as a learning lab and as a baseline for real detection pipeline experiments.
 
 ## 🚀 Features
 - **Fake services**: Simulates vulnerable services to attract malicious traffic.
@@ -25,8 +33,8 @@ To get started with the Honeypot Security System, ensure you have Docker, Docker
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/honeypot-security.git
-cd honeypot-security
+git clone https://github.com/kiurakku/Honeypot-Security-System.git
+cd Honeypot-Security-System
 ```
 
 ### 2. Deploy Infrastructure (Optional, for cloud deployment)
