@@ -3,14 +3,16 @@
 ![Repo Visibility](https://img.shields.io/badge/visibility-Public-blue)
 ![Repository Type](https://img.shields.io/badge/type-Source-lightgrey)
 ![Last Commit](https://img.shields.io/github/last-commit/kiurakku/Honeypot-Security-System)
-![Issues](https://img.shields.io/github/issues/kiurakku/Honeypot-Security-System)
+[![Issues](https://img.shields.io/github/issues/kiurakku/Honeypot-Security-System?style=flat-square&logo=github)](https://github.com/kiurakku/Honeypot-Security-System/issues)
 ![License](https://img.shields.io/github/license/kiurakku/Honeypot-Security-System)
+
+**Connect:** [![Author](https://img.shields.io/badge/GitHub-kiurakku-181717?style=flat-square&logo=github)](https://github.com/kiurakku) [![Telegram](https://img.shields.io/badge/Telegram-@SyntacticSugar-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/SyntacticSugar) [![Email](https://img.shields.io/badge/Email-yanginero%40outlook.com-0078D4?style=flat-square&logo=microsoftoutlook&logoColor=white)](mailto:yanginero@outlook.com)
 
 Polyglot honeypot security lab with Python, Go, C++, Docker, Terraform, and observability.
 
 ## Project Overview
 
-$(@{defaultBranchRef=; description=Polyglot honeypot security lab with Python, Go, C++, Docker, Terraform, and observability.; isFork=False; isPrivate=False; licenseInfo=; name=Honeypot-Security-System; primaryLanguage=; repositoryTopics=System.Object[]; visibility=PUBLIC}.name) is maintained as a **Go** project focused on reliable engineering practices, readable architecture, and practical delivery.
+**Honeypot-Security-System** is a polyglot honeypot lab (Go, Python, C++) focused on Docker, Terraform, observability, and practical security research.
 
 ## Tags
 
@@ -39,13 +41,13 @@ engineering, software, automation
 
 ## Quick Start
 
-`ash
+```bash
 git clone https://github.com/kiurakku/Honeypot-Security-System.git
 cd Honeypot-Security-System
 # Install dependencies (project-specific)
 # Build or run tests
 # Start the project
-`
+```
 
 ## Configuration
 
