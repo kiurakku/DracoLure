@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 )
+
+var dbConn *sql.DB
 
 type LogEntry struct {
 	IP          string `json:"ip"`
@@ -19,8 +22,19 @@ func logRequest(w http.ResponseWriter, r *http.Request) {
 		RequestPath: r.URL.Path,
 	}
 
+	if dbConn != nil {
+		_, err := dbConn.Exec(
+			"INSERT INTO logs (ip, user_agent, request_path) VALUES ($1, $2, $3)",
+			entry.IP, entry.UserAgent, entry.RequestPath,
+		)
+		if err != nil {
+			log.Printf("failed to persist log entry: %v", err)
+		}
+	}
+
 	log.Printf("Received request: %+v", entry)
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Logged"})
+	_ = json.NewEncoder(w).Encode(map[string]string{"message": "Logged"})
 }

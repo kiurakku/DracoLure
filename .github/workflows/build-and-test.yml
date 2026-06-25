@@ -1,46 +1,59 @@
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
-
-      - name: Install dependencies
-        run: |
-          cd backend/go-service
-          go mod tidy
+          go-version: "1.21"
 
       - name: Build Go service
         run: |
           cd backend/go-service
+          go mod tidy
           go build -v ./...
 
-      - name: Set up C++ (GCC & CMake)
-        run: |
-          sudo apt update && sudo apt install -y g++ cmake
-
-      - name: Build C++ service
+      - name: Build C++ analyzer
         run: |
           cd backend/cpp-analyzer
-          mkdir -p build && cd build
-          cmake ..
-          make
+          cmake -S . -B build
+          cmake --build build
 
-      - name: Run Tests
+      - name: Go unit tests
         run: |
           cd backend/go-service
           go test ./...
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start stack
+        run: docker compose up -d --build db app go-service
+
+      - name: Smoke test
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:5000/health; then
+              break
+            fi
+            sleep 3
+          done
+          curl -fsS -X POST http://localhost:5000/attack \
+            -H 'Content-Type: application/json' \
+            -d '{"attack_type":"ci-smoke","source_ip":"10.0.0.1"}'
+          curl -fsS http://localhost:8080/log
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

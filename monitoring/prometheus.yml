@@ -2,6 +2,6 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'honeypot'
+  - job_name: flask-metrics
     static_configs:
-      - targets: ['honeypot:5000']
+      - targets: ["app:8000"]

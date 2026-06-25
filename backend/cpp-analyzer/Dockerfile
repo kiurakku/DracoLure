@@ -1,11 +1,14 @@
-FROM gcc:latest
+FROM gcc:13-bookworm
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends cmake \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY . .
 
-RUN apt-get update && apt-get install -y cmake
+RUN cmake -S . -B build && cmake --build build
 
-RUN cmake . && make
+RUN mkdir -p logs
 
-CMD ["./honeypot_analyzer"]
+CMD ["./build/cpp_analyzer"]

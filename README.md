@@ -1,109 +1,73 @@
 # Honeypot-Security-System
 
 ![Repo Visibility](https://img.shields.io/badge/visibility-Public-blue)
-![Repository Type](https://img.shields.io/badge/type-Source-lightgrey)
-![Last Commit](https://img.shields.io/github/last-commit/kiurakku/Honeypot-Security-System)
-[![Issues](https://img.shields.io/github/issues/kiurakku/Honeypot-Security-System?style=flat-square&logo=github)](https://github.com/kiurakku/Honeypot-Security-System/issues)
+[![CI](https://github.com/kiurakku/Honeypot-Security-System/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/kiurakku/Honeypot-Security-System/actions/workflows/build-and-test.yml)
 ![License](https://img.shields.io/github/license/kiurakku/Honeypot-Security-System)
 
 **Connect:** [![Author](https://img.shields.io/badge/GitHub-kiurakku-181717?style=flat-square&logo=github)](https://github.com/kiurakku) [![Telegram](https://img.shields.io/badge/Telegram-@SyntacticSugar-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/SyntacticSugar) [![Email](https://img.shields.io/badge/Email-yanginero%40outlook.com-0078D4?style=flat-square&logo=microsoftoutlook&logoColor=white)](mailto:yanginero@outlook.com)
 
-Polyglot honeypot security lab with Python, Go, C++, Docker, Terraform, and observability.
+Polyglot honeypot lab: **Flask** (attack logging), **Go** (HTTP request logging → Postgres), **C++** (demo traffic sampler), **nginx**, **Prometheus/Grafana**, **Terraform** (optional infra).
 
-## Project Overview
+## Architecture
 
-**Honeypot-Security-System** is a polyglot honeypot lab (Go, Python, C++) focused on Docker, Terraform, observability, and practical security research.
+```
+Client → nginx:80 → app:5000 (Flask /attack)
+                 → go-service:8080 (/log → Postgres.logs)
+Prometheus ← app:8000 (metrics)
+C++ analyzer → logs/attacks.log (sidecar demo)
+Postgres ← attacks + logs tables
+```
 
-## Tags
-
-engineering, software, automation
-
-## Why This Project
-
-- Demonstrates production-minded implementation and maintainability.
-- Captures reusable patterns that can be applied across other systems.
-- Serves as a practical reference for development, operations, and quality workflows.
-
-## Key Capabilities
-
-- Clear repository structure for iterative development.
-- Standardized development lifecycle: setup, build, test, and deployment flow.
-- Continuous integration compatibility through GitHub Actions.
-- Documentation-first approach for onboarding and contribution speed.
-
-## How to Install and Use
+## Quick Start
 
 ```bash
 git clone https://github.com/kiurakku/Honeypot-Security-System.git
 cd Honeypot-Security-System
-docker compose build
-docker compose up -d
+cp .env.example .env   # optional — compose defaults work for dev
+docker compose up -d --build
 ```
 
-- **App (example):** `http://localhost:5000` (Python service in compose).
-- **Go service:** `http://localhost:8080`.
-- **Nginx:** port `80` (see `docker-compose.yml` for exact port mappings).
+| Service | URL |
+|---------|-----|
+| Flask app | http://localhost:5000 |
+| Health | http://localhost:5000/health |
+| Go logger | http://localhost:8080/log |
+| nginx | http://localhost:80 |
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
 
-Adjust `DATABASE_URL` and credentials in compose or env before production use.
+### Log a test attack
 
-## Proof of Concept (PoC)
+```bash
+curl -X POST http://localhost:5000/attack \
+  -H 'Content-Type: application/json' \
+  -d '{"attack_type":"ssh-bruteforce","source_ip":"203.0.113.10"}'
 
-- Bring the stack up with the commands above, then hit the HTTP endpoints from another container or host to generate **honeypot / decoy** traffic.
-- Point **Prometheus/Grafana** (if enabled in your deployment) at the exporters defined in the repo to show **alerts or traffic** (add a screenshot or short GIF of the dashboard when sharing).
+curl http://localhost:8080/log
+```
 
-## Tech Context
-
-- **Primary language:** Go
-- **Visibility:** Public
-- **Repository role:** Source
-- **Default branch:** main
-- **License:** GNU General Public License v3.0
-
-## Quick Start
-
-Same as **How to Install and Use** (clone → `docker compose build` → `docker compose up -d`). For development without Docker, use language-specific `README` files under `app/` and `backend/` if present.
+Smoke script (Linux/macOS/WSL): `bash scripts/smoke-test.sh`
 
 ## Configuration
 
-- Use environment variables for secrets and environment-specific values.
-- Keep local configuration in non-committed files (for example: .env.local).
-- Prefer explicit defaults and fail-fast validation for required settings.
+Усі сервіси використовують однакові змінні (див. `.env.example`):
 
-## Testing
+| Variable | Default |
+|----------|---------|
+| `POSTGRES_DB` | `honeypot` |
+| `POSTGRES_USER` | `honeypot` |
+| `POSTGRES_PASSWORD` | `honeypot_secret` |
 
-- Run unit/integration checks before each push.
-- Keep tests deterministic and scoped to behavior.
-- Add regression tests for every fixed defect.
+## Testing & CI
 
-## CI/CD
-
-This repository is designed to work with GitHub Actions pipelines for:
-
-- Build validation
-- Test execution
-- Baseline repository health checks
-
-## Roadmap
-
-- Strengthen automated quality gates and security checks.
-- Expand coverage of integration and end-to-end scenarios.
-- Improve observability, performance benchmarks, and release discipline.
-
-## Contribution Guidelines
-
-- Open an issue describing the change or bug.
-- Submit focused pull requests with clear scope.
-- Include test evidence for behavioral changes.
+- **CI:** `build-and-test.yml` — збірка Go/C++, `docker compose` smoke test.
+- Локально: `docker compose up -d db app go-service` → POST `/attack` → GET `/log`.
 
 ## Security Notes
 
-- Do not commit credentials, tokens, or private keys.
-- Report sensitive findings privately via maintainer contact channels.
+- Лише для **лабораторного** використання; не виставляй у прод без ізоляції мережі.
+- Не коміть реальні credentials; зміни пароль перед публічним деплоєм.
 
 ## License
 
-This project is distributed under **GNU General Public License v3.0**.
-
-## Maintainer
-
-Maintained by **Kiurakku** as part of a portfolio of software engineering, security engineering, and platform projects.
+GNU General Public License v3.0
