@@ -1,14 +1,8 @@
-Flask
-psycopg2
-prometheus_client
-gunicorn
-Flask-SQLAlchemy
-Flask-Migrate
-requests
-Flask-Cors
-pytest
-flask-testing
-flask-login
-sqlalchemy-utils
-Celery
-python-dotenv
+# Runtime dependencies for the Flask honeypot surface.
+Flask>=3.0
+psycopg2-binary>=2.9
+prometheus-client>=0.20
+gunicorn>=21.2
+
+# Test-only (used by CI and `pytest app/tests`).
+pytest>=8.0
