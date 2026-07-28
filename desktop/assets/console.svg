@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" role="img" aria-label="DracoLure Desktop Console mockup">
+  <rect width="960" height="600" rx="10" fill="#f4f5f7" stroke="#c9ced6"/>
+  <rect x="0" y="0" width="960" height="34" rx="10" fill="#2b2f36"/>
+  <circle cx="20" cy="17" r="5" fill="#ff5f57"/><circle cx="38" cy="17" r="5" fill="#febc2e"/><circle cx="56" cy="17" r="5" fill="#28c840"/>
+  <text x="480" y="22" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#e8eaed">DracoLure — Threat Console</text>
+
+  <!-- toolbar -->
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#2b2f36">
+    <text x="20" y="62">Server</text>
+    <rect x="70" y="50" width="250" height="20" rx="4" fill="#fff" stroke="#c9ced6"/>
+    <text x="78" y="64" fill="#5b6470">http://localhost:5000</text>
+    <text x="335" y="62">API key</text>
+    <rect x="390" y="50" width="120" height="20" rx="4" fill="#fff" stroke="#c9ced6"/>
+    <text x="398" y="64" fill="#9aa3ad">••••••••</text>
+    <text x="525" y="62">Refresh</text>
+    <rect x="580" y="50" width="52" height="20" rx="4" fill="#fff" stroke="#c9ced6"/>
+    <text x="588" y="64" fill="#5b6470">3s</text>
+    <rect x="648" y="49" width="86" height="22" rx="5" fill="#3a7afe"/>
+    <text x="691" y="64" text-anchor="middle" fill="#fff">Connect</text>
+  </g>
+
+  <!-- tiles -->
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <g><rect x="20" y="86" width="176" height="66" rx="8" fill="#fff" stroke="#dfe3e8"/>
+      <text x="108" y="122" text-anchor="middle" font-size="26" font-weight="bold" fill="#2b2f36">37</text>
+      <text x="108" y="142" text-anchor="middle" font-size="11" fill="#6b7480">Tracked sources</text></g>
+    <g><rect x="204" y="86" width="176" height="66" rx="8" fill="#fff" stroke="#dfe3e8"/>
+      <text x="292" y="122" text-anchor="middle" font-size="26" font-weight="bold" fill="#d9534f">3</text>
+      <text x="292" y="142" text-anchor="middle" font-size="11" fill="#6b7480">Blocked now</text></g>
+    <g><rect x="388" y="86" width="176" height="66" rx="8" fill="#fff" stroke="#dfe3e8"/>
+      <text x="476" y="122" text-anchor="middle" font-size="26" font-weight="bold" fill="#2b2f36">9</text>
+      <text x="476" y="142" text-anchor="middle" font-size="11" fill="#6b7480">Blocks total</text></g>
+    <g><rect x="572" y="86" width="176" height="66" rx="8" fill="#fff" stroke="#dfe3e8"/>
+      <text x="660" y="122" text-anchor="middle" font-size="26" font-weight="bold" fill="#2b2f36">100</text>
+      <text x="660" y="142" text-anchor="middle" font-size="11" fill="#6b7480">Events (feed)</text></g>
+    <g><rect x="756" y="86" width="184" height="66" rx="8" fill="#fff" stroke="#dfe3e8"/>
+      <text x="848" y="122" text-anchor="middle" font-size="26" font-weight="bold" fill="#2b2f36">100</text>
+      <text x="848" y="142" text-anchor="middle" font-size="11" fill="#6b7480">Block threshold</text></g>
+  </g>
+
+  <!-- top sources -->
+  <text x="20" y="180" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="bold" fill="#2b2f36">Top sources</text>
+  <rect x="20" y="188" width="920" height="112" rx="8" fill="#fff" stroke="#dfe3e8"/>
+  <rect x="20" y="188" width="920" height="26" rx="8" fill="#eef1f5"/>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#5b6470">
+    <text x="34" y="205">IP</text><text x="360" y="205">Score</text><text x="500" y="205">Hits</text><text x="640" y="205">Blocked</text>
+  </g>
+  <g font-family="Consolas, monospace" font-size="12" fill="#2b2f36">
+    <text x="34" y="234">10.10.10.10</text><text x="360" y="234">100</text><text x="500" y="234">14</text><text x="640" y="234" fill="#d9534f">yes</text>
+    <text x="34" y="258">198.51.100.7</text><text x="360" y="258">60</text><text x="500" y="258">6</text><text x="640" y="258" fill="#6b7480">no</text>
+    <text x="34" y="282">192.0.2.99</text><text x="360" y="282">40</text><text x="500" y="282">3</text><text x="640" y="282" fill="#6b7480">no</text>
+  </g>
+
+  <!-- recent events -->
+  <text x="20" y="326" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="bold" fill="#2b2f36">Recent events</text>
+  <rect x="20" y="334" width="920" height="198" rx="8" fill="#fff" stroke="#dfe3e8"/>
+  <rect x="20" y="334" width="920" height="26" rx="8" fill="#eef1f5"/>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#5b6470">
+    <text x="34" y="351">Time</text><text x="180" y="351">IP</text><text x="330" y="351">Method</text><text x="410" y="351">Path</text><text x="640" y="351">Score</text><text x="710" y="351">Severity</text><text x="820" y="351">Categories</text>
+  </g>
+  <g font-family="Consolas, monospace" font-size="11.5">
+    <text x="34" y="380" fill="#2b2f36">15:00:12</text><text x="180" y="380" fill="#2b2f36">10.10.10.10</text><text x="330" y="380" fill="#2b2f36">GET</text><text x="410" y="380" fill="#2b2f36">/search?id=1' OR 1=1--</text><text x="640" y="380" fill="#b00020">100</text><text x="710" y="380" fill="#b00020">critical</text><text x="820" y="380" fill="#b00020">sql-injection</text>
+    <text x="34" y="404" fill="#2b2f36">15:00:10</text><text x="180" y="404" fill="#2b2f36">198.51.100.7</text><text x="330" y="404" fill="#2b2f36">GET</text><text x="410" y="404" fill="#2b2f36">/wp-login.php</text><text x="640" y="404" fill="#e0a800">20</text><text x="710" y="404" fill="#e0a800">low</text><text x="820" y="404" fill="#e0a800">recon-scanner</text>
+    <text x="34" y="428" fill="#2b2f36">15:00:07</text><text x="180" y="428" fill="#2b2f36">192.0.2.99</text><text x="330" y="428" fill="#2b2f36">GET</text><text x="410" y="428" fill="#2b2f36">/download?file=../../etc/passwd</text><text x="640" y="428" fill="#d9534f">35</text><text x="710" y="428" fill="#d9534f">medium</text><text x="820" y="428" fill="#d9534f">path-traversal</text>
+    <text x="34" y="452" fill="#2b2f36">15:00:05</text><text x="180" y="452" fill="#2b2f36">192.0.2.99</text><text x="330" y="452" fill="#2b2f36">GET</text><text x="410" y="452" fill="#2b2f36">/.env</text><text x="640" y="452" fill="#d9534f">30</text><text x="710" y="452" fill="#d9534f">medium</text><text x="820" y="452" fill="#d9534f">credential-access</text>
+    <text x="34" y="476" fill="#2b2f36">15:00:02</text><text x="180" y="476" fill="#2b2f36">203.0.113.4</text><text x="330" y="476" fill="#2b2f36">POST</text><text x="410" y="476" fill="#2b2f36">/api?x=${jndi:ldap://…}</text><text x="640" y="476" fill="#b00020">50</text><text x="710" y="476" fill="#b00020">high</text><text x="820" y="476" fill="#b00020">log4shell</text>
+  </g>
+
+  <!-- action buttons + status -->
+  <rect x="20" y="546" width="86" height="26" rx="5" fill="#fff" stroke="#c9ced6"/><text x="63" y="563" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#2b2f36">Block IP…</text>
+  <rect x="116" y="546" width="140" height="26" rx="5" fill="#fff" stroke="#c9ced6"/><text x="186" y="563" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#2b2f36">Unblock selected</text>
+  <rect x="266" y="546" width="96" height="26" rx="5" fill="#fff" stroke="#c9ced6"/><text x="314" y="563" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#2b2f36">Refresh now</text>
+  <text x="940" y="563" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#3a7afe">Connected · 37 sources · 3 blocked · updated 15:00:12</text>
+</svg>

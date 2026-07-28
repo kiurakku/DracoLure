@@ -16,6 +16,8 @@ from flask import Flask, Response, jsonify, request
 from prometheus_client import Counter, Histogram, Summary, start_http_server
 
 import database as db
+from api import api_bp, init_api
+from version import __version__
 from decoys import decoy_for
 from detection import analyze
 from threat import ThreatTracker
@@ -59,11 +61,48 @@ def _client_ip() -> str:
     return request.remote_addr or "0.0.0.0"
 
 
+def process_request(ip, method, path, query, body, user_agent):
+    """Classify, score, persist, and count one interaction.
+
+    Shared by the live ``before_request`` sentinel and the ``/api/v1/ingest``
+    endpoint so on-surface traffic and reports from injected agents are scored
+    identically. Returns ``(detection, state)`` — ``state`` is ``None`` for
+    benign traffic. Side effects only (metrics, DB, tracker); no HTTP concern.
+    """
+    # analyze() decode-normalises internally, so encoded payloads
+    # (e.g. %27%20OR%201=1) are matched alongside their raw form.
+    detection = analyze(
+        method=method, path=path, query=query, body=body, user_agent=user_agent,
+    )
+    if not detection.is_malicious:
+        return detection, None
+
+    state = tracker.record(ip, detection.score)
+    THREAT_SCORE.observe(detection.score)
+    for category in detection.categories:
+        EVENTS.labels(category=category, severity=detection.severity).inc()
+
+    db.record_event(
+        source_ip=ip, method=method, path=path, query=query, user_agent=user_agent,
+        categories=detection.categories, threat_score=detection.score,
+        severity=detection.severity, payload=body[:2048], blocked=state.blocked,
+    )
+    log.warning(
+        "intrusion ip=%s score=%s severity=%s categories=%s path=%s%s",
+        ip, detection.score, detection.severity,
+        ",".join(detection.categories), path,
+        " [QUARANTINED]" if state.newly_blocked else "",
+    )
+    if state.newly_blocked:
+        BLOCKS.inc()
+    return detection, state
+
+
 @app.before_request
 def sentinel():
     """Analyse, score, persist, and quarantine — before any route runs."""
     path = request.path
-    if path in _SAFE_PATHS:
+    if path in _SAFE_PATHS or path.startswith("/api/v1"):
         return None
 
     ip = _client_ip()
@@ -78,45 +117,9 @@ def sentinel():
     query = request.query_string.decode("utf-8", "replace")
     ua = request.headers.get("User-Agent", "")
 
-    # analyze() decode-normalises internally, so encoded payloads
-    # (e.g. %27%20OR%201=1) are matched alongside their raw form.
-    detection = analyze(
-        method=request.method, path=path, query=query, body=body, user_agent=ua,
-    )
+    _, state = process_request(ip, request.method, path, query, body, ua)
 
-    # Plain, benign traffic (e.g. the container healthcheck hitting "/") scores
-    # zero and is neither recorded nor counted — the event log stays signal.
-    if not detection.is_malicious:
-        return None
-
-    state = tracker.record(ip, detection.score)
-
-    THREAT_SCORE.observe(detection.score)
-    for category in detection.categories:
-        EVENTS.labels(category=category, severity=detection.severity).inc()
-
-    db.record_event(
-        source_ip=ip,
-        method=request.method,
-        path=path,
-        query=query,
-        user_agent=ua,
-        categories=detection.categories,
-        threat_score=detection.score,
-        severity=detection.severity,
-        payload=body[:2048],
-        blocked=state.blocked,
-    )
-
-    log.warning(
-        "intrusion ip=%s score=%s severity=%s categories=%s path=%s%s",
-        ip, detection.score, detection.severity,
-        ",".join(detection.categories), path,
-        " [QUARANTINED]" if state.newly_blocked else "",
-    )
-
-    if state.newly_blocked:
-        BLOCKS.inc()
+    if state and state.newly_blocked:
         TARPITS.inc()
         time.sleep(_TARPIT_SECONDS)
         return Response("Forbidden", status=403, mimetype="text/plain")
@@ -126,7 +129,11 @@ def sentinel():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok" if db.ping() else "degraded"}), 200
+    return jsonify({
+        "status": "ok" if db.ping() else "degraded",
+        "name": "DracoLure",
+        "version": __version__,
+    }), 200
 
 
 @app.route("/attack", methods=["POST"])
@@ -144,6 +151,19 @@ def log_attack():
 def stats():
     """Operator-only aggregate view of live threat activity."""
     return jsonify(tracker.snapshot()), 200
+
+
+# Wire the /api/v1 integration surface (ingest, stats, events, block/unblock).
+def _ingest(ip, method, path, query, body, user_agent):
+    return process_request(ip, method, path, query, body, user_agent)
+
+
+init_api(
+    tracker=tracker,
+    ingest=_ingest,
+    api_key=os.environ.get("DRACOLURE_API_KEY"),
+)
+app.register_blueprint(api_bp)
 
 
 @app.route("/", defaults={"path": ""},

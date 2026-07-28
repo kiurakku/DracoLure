@@ -73,6 +73,26 @@ class ThreatTracker:
             src = self._sources.get(ip)
             return bool(src and src.blocked_until > now)
 
+    def block(self, ip: str, ttl_seconds: int = None) -> None:
+        """Manually quarantine ``ip`` (operator action from API/console)."""
+        ttl = self.block_ttl_seconds if ttl_seconds is None else ttl_seconds
+        now = time.time()
+        with self._lock:
+            src = self._sources.setdefault(ip, _Source())
+            if src.blocked_until <= now:
+                self._blocks_total += 1
+            src.blocked_until = now + ttl
+
+    def unblock(self, ip: str) -> bool:
+        """Manually release ``ip`` from quarantine. Returns True if it was blocked."""
+        now = time.time()
+        with self._lock:
+            src = self._sources.get(ip)
+            was_blocked = bool(src and src.blocked_until > now)
+            if src:
+                src.blocked_until = 0.0
+            return was_blocked
+
     def snapshot(self) -> Dict[str, object]:
         """Aggregate view for the operator stats endpoint."""
         now = time.time()

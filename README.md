@@ -7,6 +7,8 @@
 **Dragon Vector Honeypot** — a polyglot deception honeypot that lures attackers, classifies every probe the instant it lands, scores the threat, and quarantines hostile sources — all in real time.
 
 <!-- Status -->
+[![Version](https://img.shields.io/badge/version-1.0.0-gold?style=flat-square)](VERSION)
+[![Release](https://img.shields.io/github/v/tag/kiurakku/DracoLure?label=release&color=gold)](https://github.com/kiurakku/DracoLure/releases)
 [![CI](https://github.com/kiurakku/DracoLure/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/kiurakku/DracoLure/actions/workflows/build-and-test.yml)
 ![License](https://img.shields.io/github/license/kiurakku/DracoLure?color=blue)
 ![Repo Visibility](https://img.shields.io/badge/visibility-Public-blue)
@@ -25,9 +27,26 @@
 ![Grafana](https://img.shields.io/badge/Grafana-dashboards-F46800?logo=grafana&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-optional-7B42BC?logo=terraform&logoColor=white)
 
+<!-- Embed -->
+![REST API](https://img.shields.io/badge/REST-%2Fapi%2Fv1-6E56CF)
+![Python SDK](https://img.shields.io/badge/SDK-Python-3776AB?logo=python&logoColor=white)
+![Inject](https://img.shields.io/badge/inject-WSGI%20%2F%20ASGI-8B5CF6)
+![Desktop](https://img.shields.io/badge/Desktop-Tkinter%20console-2EA44F)
+
 **Connect:** [![Author](https://img.shields.io/badge/GitHub-kiurakku-181717?style=flat-square&logo=github)](https://github.com/kiurakku) [![Telegram](https://img.shields.io/badge/Telegram-@SyntacticSugar-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/SyntacticSugar) [![Email](https://img.shields.io/badge/Email-yanginero%40outlook.com-0078D4?style=flat-square&logo=microsoftoutlook&logoColor=white)](mailto:yanginero@outlook.com)
 
 </div>
+
+---
+
+## 📸 Preview
+
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/dashboard-preview.svg" alt="Grafana threat dashboard" width="100%"><br><sub>📊 Live Grafana board — categories, severity, quarantines</sub></td>
+<td width="50%"><img src="desktop/assets/console.svg" alt="Desktop console" width="100%"><br><sub>🖥️ Tkinter console — sources, events, block/unblock</sub></td>
+</tr>
+</table>
 
 ---
 
@@ -56,7 +75,9 @@ This is **not** a passive log sink. The moment a request touches the honeypot, a
 | ⛓️ | **Auto-quarantine + tarpit** | Rolling per-IP scoring, TTL blocklist, slowed 403 responses |
 | 🛡️ | **Fail-open resilience** | If Postgres blinks, events still hit stdout — the sensor never crashes |
 | 📊 | **Live dashboards** | Prometheus metrics + provisioned Grafana board, out of the box |
-| 🧪 | **Tested** | Go + C++ builds, Python detection unit tests, compose smoke test in CI |
+| 🧪 | **Tested** | Go + C++ builds, Python detection/API/SDK tests, compose smoke test in CI |
+| 🧩 | **Embeddable** | REST `/api/v1`, stdlib Python SDK, one-line WSGI/ASGI middleware, Docker |
+| 🖥️ | **Desktop console** | Tkinter GUI (stdlib) — live sources, events feed, block/unblock |
 | 🌐 | **Polyglot** | Flask · Go · C++ · nginx · Postgres · Prometheus · Grafana |
 
 ---
@@ -66,12 +87,14 @@ This is **not** a passive log sink. The moment a request touches the honeypot, a
 ```mermaid
 flowchart LR
     A([🌐 Attacker / Scanner]) -->|HTTP| N[nginx :80]
-    N -->|/ and traps| F["🐍 Flask honeypot :5000<br/>sentinel · detection · quarantine"]
+    Apps["🧩 Your apps<br/>SDK · middleware"] -->|/api/v1/ingest| F
+    N -->|/ and traps| F["🐍 DracoLure :5000<br/>sentinel · detection · quarantine · /api/v1"]
     N -->|/log| G["🐹 Go logger :8080"]
     F -->|classified events| DB[("🐘 Postgres<br/>attacks · logs · honeypot_events")]
     G -->|request logs| DB
     F -->|/metrics :8000| P["📡 Prometheus :9090"]
     P --> Gr["📊 Grafana :3000<br/>Live Threat Activity"]
+    Console["🖥️ Desktop console"] -->|/api/v1 stats · events · block| F
     C["⚙️ C++ analyzer<br/>(sidecar demo)"] -.-> L[["logs/attacks.log"]]
 ```
 
@@ -107,6 +130,7 @@ docker compose up -d --build
 | 🐍 Flask honeypot | http://localhost:5000 | Deception surface + detection engine |
 | ❤️ Health | http://localhost:5000/health | Liveness / DB status |
 | 📊 Honeypot stats | http://localhost:5000/honeypot/stats | Live threat snapshot (JSON) |
+| 🧩 Integration API | http://localhost:5000/api/v1 | Ingest · stats · events · block/unblock |
 | 🐹 Go logger | http://localhost:8080/log | Raw request logging |
 | 🔀 nginx | http://localhost:80 | Reverse proxy / edge |
 | 📡 Prometheus | http://localhost:9090 | Metrics store |
@@ -161,6 +185,60 @@ curl -X POST http://localhost:5000/attack \
 
 ---
 
+## 🧩 Embed DracoLure anywhere
+
+DracoLure doubles as a central **detection service**. Your own apps report
+requests to it over `/api/v1`; it classifies each one, tracks the source, and
+returns a verdict you can act on. Four ways to plug in — full guide in
+[`integrations/`](integrations/).
+
+**One-line middleware injection** (any WSGI app — Flask/Django/…):
+
+```python
+from dracolure import DracoLureClient, DracoLureMiddleware
+app.wsgi_app = DracoLureMiddleware(app.wsgi_app,
+                                   DracoLureClient("http://dracolure:5000"),
+                                   mode="block")   # or "monitor" (zero-latency)
+```
+
+**SDK / REST** (stdlib-only client, or plain HTTP from any language):
+
+```python
+from dracolure import DracoLureClient
+c = DracoLureClient("http://localhost:5000")
+v = c.ingest(method="GET", path="/x", query="id=1' OR 1=1--", source_ip="203.0.113.5")
+print(v.recommendation, v.score, v.categories)   # -> monitor 40 ['sql-injection']
+```
+
+```bash
+curl -s -X POST http://localhost:5000/api/v1/ingest -H 'Content-Type: application/json' \
+  -d '{"method":"GET","path":"/x","query":"id=1'\'' OR 1=1--","source_ip":"203.0.113.5"}'
+```
+
+| Integration | Best for | Reference |
+|-------------|----------|-----------|
+| 🧩 Middleware (WSGI/ASGI) | Existing web apps, no route changes | [examples/flask_app.py](integrations/examples/flask_app.py) · [fastapi_app.py](integrations/examples/fastapi_app.py) |
+| 🐍 Python SDK | Scripts, pipelines, custom logic | [python-sdk/](integrations/python-sdk) |
+| 🌐 REST `/api/v1` | Any language | [examples/curl.md](integrations/examples/curl.md) · [node_client.js](integrations/examples/node_client.js) |
+| 🐳 Docker | Shared service on a compose network | [docker/](integrations/docker) |
+
+> The middleware is **fail-open** (your app keeps serving if DracoLure is down)
+> and never consumes the request body, so it can't break downstream handlers.
+
+---
+
+## 🖥️ Desktop console
+
+A cross-platform GUI ([`desktop/`](desktop/)) — Python **Tkinter**, standard
+library only — connects to a running server and shows the live threat picture
+with one-click quarantine control.
+
+```bash
+python desktop/dracolure_console.py --url http://localhost:5000
+```
+
+---
+
 ## 🧬 Detection coverage
 
 | Category | Example payload | Weight |
@@ -204,17 +282,21 @@ All services share the same variables (see [`.env.example`](.env.example)):
 | `HONEYPOT_WINDOW_SECONDS` | `300` | Rolling scoring window |
 | `HONEYPOT_BLOCK_TTL` | `600` | Quarantine duration (seconds) |
 | `HONEYPOT_TARPIT_SECONDS` | `1.5` | Delay applied to quarantined sources |
+| `DRACOLURE_API_KEY` | *(unset)* | If set, every `/api/v1` call must send `X-API-Key` |
 
 ---
 
 ## 🧪 Testing & CI
 
-- **CI** ([`build-and-test.yml`](.github/workflows/build-and-test.yml)) — builds Go & C++, runs Go unit tests, runs the **Python detection-engine tests**, then a `docker compose` integration smoke test.
+- **CI** ([`build-and-test.yml`](.github/workflows/build-and-test.yml)) — builds Go & C++, runs Go unit tests, runs the **Python detection + API tests** and the **SDK middleware tests**, then a `docker compose` integration smoke test.
 - **Locally:**
 
 ```bash
-# Detection engine unit tests (pure logic, no services needed)
+# Detection engine + API tests (app/tests)
 cd app && python -m pytest tests/ -q
+
+# SDK / middleware tests
+cd integrations/python-sdk && python -m pytest tests/ -q
 
 # Go unit tests
 cd backend/go-service && go test ./...
@@ -229,13 +311,19 @@ bash scripts/smoke-test.sh
 
 ```text
 DracoLure/
-├─ app/                     # 🐍 Flask honeypot
+├─ app/                     # 🐍 Flask honeypot + /api/v1
 │  ├─ main.py               #   sentinel, routing, quarantine wiring
 │  ├─ detection.py          #   signature engine (pure, unit-tested)
 │  ├─ threat.py             #   per-IP scoring + quarantine store
 │  ├─ decoys.py             #   deceptive bait responses (all fake)
+│  ├─ api.py                #   /api/v1 integration surface
 │  ├─ database.py           #   resilient persistence
-│  └─ tests/                #   pytest detection/threat tests
+│  └─ tests/                #   pytest detection / threat / API tests
+├─ integrations/            # 🧩 embed DracoLure elsewhere
+│  ├─ python-sdk/           #   stdlib client + injectable middleware (+ tests)
+│  ├─ examples/             #   Flask, FastAPI, curl, Node
+│  └─ docker/               #   shared-service compose
+├─ desktop/                 # 🖥️ Tkinter threat console
 ├─ backend/
 │  ├─ go-service/           # 🐹 Go request logger → Postgres
 │  └─ cpp-analyzer/         # ⚙️ C++ sidecar (demo)

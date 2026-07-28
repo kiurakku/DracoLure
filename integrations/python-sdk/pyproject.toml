@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dracolure"
+version = "1.0.0"
+description = "DracoLure honeypot SDK — client + injectable WSGI middleware (stdlib only)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "kiurakku" }]
+keywords = ["honeypot", "security", "waf", "intrusion-detection", "dracolure"]
+dependencies = []  # standard library only
+
+[project.urls]
+Homepage = "https://github.com/kiurakku/DracoLure"
+
+[tool.setuptools]
+packages = ["dracolure"]

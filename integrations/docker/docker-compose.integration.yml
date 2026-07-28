@@ -1,0 +1,56 @@
+# Run DracoLure as a shared detection service other containers report to.
+#   docker compose -f integrations/docker/docker-compose.integration.yml up -d
+#
+# Any app on the same network then sends events to http://dracolure:5000/api/v1
+# (install the SDK and set DRACOLURE_URL — see the commented protected-app below).
+
+services:
+  dracolure:
+    build:
+      context: ../../app
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"   # surface + /api/v1
+      - "8000:8000"   # Prometheus metrics
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: dracolure
+      POSTGRES_USER: dracolure
+      POSTGRES_PASSWORD: change_me
+      # DRACOLURE_API_KEY: set-a-shared-key   # uncomment to require X-API-Key
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - ../../db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - dl-pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: dracolure
+      POSTGRES_USER: dracolure
+      POSTGRES_PASSWORD: change_me
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dracolure -d dracolure"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # --- Example: your own app, protected by the injected middleware ---------
+  # protected-app:
+  #   build: ./my-app          # your app image; `pip install dracolure` in it
+  #   environment:
+  #     DRACOLURE_URL: http://dracolure:5000
+  #     # DRACOLURE_API_KEY: set-a-shared-key
+  #   depends_on:
+  #     - dracolure
+  #   # In your app:
+  #   #   from dracolure import DracoLureClient, DracoLureMiddleware
+  #   #   app.wsgi_app = DracoLureMiddleware(app.wsgi_app,
+  #   #       DracoLureClient(os.environ["DRACOLURE_URL"]), mode="block")
+
+volumes:
+  dl-pgdata:
+    driver: local

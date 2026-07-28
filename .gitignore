@@ -6,6 +6,7 @@ __pycache__
 
 
 # Python
+.pytest_cache/
 __pycache__/
 *.pyc
 *.pyo

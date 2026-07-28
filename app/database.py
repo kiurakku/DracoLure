@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional, Sequence
+from typing import List, Optional, Sequence
 
 import psycopg2
 
@@ -58,6 +58,36 @@ def record_attack(attack_type: str, source_ip: str) -> bool:
         "VALUES (%s, %s, NOW())",
         (attack_type, source_ip),
     )
+
+
+def fetch_events(limit: int = 100, min_score: int = 0) -> List[dict]:
+    """Return the most recent classified events (newest first).
+
+    Returns an empty list on any failure so API/console consumers degrade
+    gracefully when the database is unreachable.
+    """
+    try:
+        conn = get_db_connection()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id, source_ip, method, path, query, user_agent, "
+                    "categories, threat_score, severity, blocked, "
+                    "to_char(timestamp, 'YYYY-MM-DD\"T\"HH24:MI:SSOF') "
+                    "FROM honeypot_events WHERE threat_score >= %s "
+                    "ORDER BY timestamp DESC LIMIT %s",
+                    (min_score, min(max(limit, 1), 1000)),
+                )
+                cols = [
+                    "id", "source_ip", "method", "path", "query", "user_agent",
+                    "categories", "threat_score", "severity", "blocked", "timestamp",
+                ]
+                return [dict(zip(cols, row)) for row in cur.fetchall()]
+        finally:
+            conn.close()
+    except Exception as exc:  # noqa: BLE001 - read path must not crash callers
+        log.warning("db read failed (returning empty): %s", exc)
+        return []
 
 
 def record_event(
